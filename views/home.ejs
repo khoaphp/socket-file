@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Home</title>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+    var socket = io("http://localhost:3000");
+
+    socket.on("sever-send-hinh", function(data){
+        $("#content").append(`
+            <img src="http://localhost:3000/upload/` + data + `" />
+        `);
+    });
+
+    $(document).ready(function(){
+        $("#Send").click(function(){
+            var data = new FormData();
+            jQuery.each(jQuery('#hinh')[0].files, function(i, file) {
+                console.log('file-'+i);
+                data.append('file-'+i, file);
+            });
+
+            jQuery.ajax({
+                url: './upload',
+                data: data,
+                cache: false,
+                contentType: false,
+                processData: false,
+                method: 'POST',
+                type: 'POST', // For jQuery < 1.9
+                success: function(data){
+                    if(data.kq==1){
+                        socket.emit("client-send-hinh", data.file);    
+                    }else{
+                        alert("Upload hinh bi loi!");
+                    }
+                }
+            });
+        });
+    });
+
+    
+    </script>
+</head>
+<body>
+    <input type="text" id="txtMsg" />
+    <input type="file" id="hinh" />
+    <button id="Send">Send</button>
+    <div id="content"></div>
+</body>
+</html>
